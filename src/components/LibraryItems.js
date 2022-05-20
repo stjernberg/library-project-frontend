@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DeleteForever, Add } from "@material-ui/icons";
 import { Table, Form, Button } from "react-bootstrap";
 import { TableWrapper } from "../Styling";
-import { fetchItems, getAllItems } from "../redux/librarySlice";
+import { getAllItems } from "../redux/librarySlice";
+import { fetchItems } from "../fetches";
 
 const LibraryItems = () => {
-  const dispatch = useDispatch();  
+  const dispatch = useDispatch();
   const items = useSelector(getAllItems);
 
   useEffect(() => {

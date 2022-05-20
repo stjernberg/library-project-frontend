@@ -5,7 +5,7 @@ export const PageWrapper = styled.div`
   min-height: 100vh;
   width: 100%;
   padding-top: 80px;
-  background-color: #f7f7f7;
+  //::contentbackground-color: #f7f7f7;
   display: flex;
   flex-direction: column;
   align-items: center;

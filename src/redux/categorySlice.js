@@ -1,22 +1,18 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-
-import { getCategoriesAPI, addCategoryAPI, deleteCategoryAPI } from "../API";
-const baseURL = "https://localhost:44368/api";
-
-export const fetchCategories = createAsyncThunk(
-  "categories/fetchCategories",
-  async () => {
-    const response = await axios.get(`${baseURL}/categories`);
-    console.log(response.data);
-    return response.data;
-  }
-);
+import {
+  fetchCategories,
+  createCategory,
+  deleteCategory,
+  getCategory,
+  editCategory,
+} from "../fetches";
 
 const initialState = {
   categories: [],
   category: {},
   loading: false,
+  message: "",
 };
 const categorySlice = createSlice({
   name: "categories",
@@ -25,8 +21,14 @@ const categorySlice = createSlice({
     removeCategory: (state) => {
       state.category = {};
     },
+    setMessage: (state, action) => {
+      state.message = action.payload;
+    },
     setCategories: (state, action) => {
       state.categories.push(action.payload);
+    },
+    setCategory: (state, action) => {
+      state.category = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -38,60 +40,62 @@ const categorySlice = createSlice({
         state.loading = false;
         console.log(action.payload);
         state.categories = action.payload;
+      })
+
+      .addCase(createCategory.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(createCategory.fulfilled, (state, action) => {
+        state.loading = false;
+        console.log(action.payload);
+        state.categories.push(action.payload);
+      })
+      .addCase(deleteCategory.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteCategory.fulfilled, (state, action) => {
+        state.loading = false;
+        console.log("Returned response", action.payload);
+        state.message = "Category has successfully been deleted.";
+      })
+      .addCase(deleteCategory.rejected, (state) => {
+        state.loading = true;
+        console.log("Category can't be deleted.");
+        state.message = "Category can't be deleted.";
+      })
+      .addCase(getCategory.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getCategory.fulfilled, (state, action) => {
+        state.loading = false;
+        console.log("Category:", action.payload);
+        state.category = action.payload;
+      })
+      .addCase(editCategory.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(editCategory.fulfilled, (state, action) => {
+        state.loading = false;
+        console.log("editCategory:", action.payload);
+        state.categories.push(action.payload);
       });
   },
 });
 
-export const getAllCategories = (state) => state.categories.categories;
-export default categorySlice.reducer;
+//-----------Edit a category----------------
 
-//export const { library } = librarySlice.actions;
-//export const getAllItems = (state) => state.library.items;
-//export const getAllItems = (state) => state.library.items;
-//export default categorySlice.reducer;
-// const initialState = {
-//   categories: [],
-//   category: {},
-//   message: "",
-//   error: null,
-//   loading: false,
+// const editCategoryAPI = async (id, category) => {
+//   return await axios.put(
+//     `https://localhost:44368/api/categories/${id}`,
+//     category
+//   );
 // };
 
-// export const categorySlice = createSlice({
-//   name: "category",
-//   initialState,
-//   reducers: {
-//     requestStarted: (state) => {
-//       state.loading = true;
-//     },
-//     requestFailed: (state, action) => {
-//       state.error = action.payload;
-//       state.loading = false;
-//       state.posts = [];
-//       state.posts = {};
-//     },
-
-//     setCategories: (state, action) => {
-//       state.categories = action.payload;
-//       state.loading = false;
-//       state.error = null;
-//     },
-
-//     setMessage: (state, action) => {
-//       state.message = action.payload;
-//     },
-//   },
-// });
-
-// //-----------Get all Categories----------------
-
-// export const getCategories = () => (dispatch) => {
-//   dispatch(requestStarted());
-//   getCategoriesAPI()
+// export const editCategory = (id, category) => (dispatch) => {
+//   editCategoryAPI(id, category)
 //     .then((res) => {
-//       console.log(res.data);
-//       // dispatch({ type: postsFetched.type, payload: res.data });
-//       dispatch(setCategories(res.data));
+//       console.log("Category is edited:", res.data);
+//       dispatch(setCategory(res.data));
 //     })
 //     .catch((err) => {
 //       console.log("Error:", err);
@@ -99,69 +103,7 @@ export default categorySlice.reducer;
 //     });
 // };
 
-// //--------Create a new category ----------------
-// export const addCategory = (category) => (dispatch) => {
-//   dispatch(requestStarted());
-
-//   addCategoryAPI(category)
-//     .then((res) => {
-//       dispatch(categoriesAdded(res.data));
-//       // dispatch(setMessage("Category successfully added!"));
-//       getCategories()
-//         .then((fetchRes) => {
-//           dispatch(categoriesFetched(fetchRes.data));
-//         })
-//         .catch((err) => {
-//           console.log("ERR:", err);
-//           // dispatch error
-//         });
-//     })
-
-//     .catch((err) => {
-//       // dispatch error
-//       console.log("ERR:", err);
-//     });
-// };
-
-// //--------Delete a category ----------------
-// export const deleteCategory = (id) => (dispatch) => {
-//   dispatch(requestStarted());
-//   deleteCategoryAPI(id)
-//     .then((deleteRes) => {
-//       switch (deleteRes.status) {
-//         case 200:
-//           dispatch(setMessage("Category successfully deleted!"));
-//           break;
-//         case 400:
-//           dispatch(setMessage("Bad request, category couldn't be deleted!"));
-//           break;
-//         case 409:
-//           dispatch(
-//             setMessage(
-//               "Category couldn't be deleted, due to it's being linked to a post!"
-//             )
-//           );
-//           break;
-//         default:
-//           break;
-//       }
-//       getCategoriesAPI()
-//         .then((fetchRes) => {
-//           dispatch(categoriesFetched(fetchRes.data));
-//         })
-//         .catch((err) => {
-//           console.log("ERR:", err);
-//         });
-//     })
-//     .catch((err) => {
-//       console.log("ERR:", err);
-//     });
-// };
-
-// export const {
-//   category,
-//   requestStarted,
-//   requestFailedPost,
-//   setMessage,
-//   setCategories,
-// } = categorySlice.actions;
+export const { setMessage, setCategory } = categorySlice.actions;
+export const getAllCategories = (state) => state.categories.categories;
+export const getMessage = (state) => state.categories.message;
+export default categorySlice.reducer;

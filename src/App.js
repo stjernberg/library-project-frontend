@@ -1,24 +1,33 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 import LibraryItems from "./components/LibraryItems";
 import ItemForm from "./components/ItemForm";
 import Categories from "./components/Categories";
+import CategoryForm from "./components/CategoryForm";
+import Header from "./components/Header";
+import Home from "./components/Home";
+import { PageWrapper } from "./Styling";
 
 const App = () => {
   return (
-    <div>
-      <Router>
-        {/* <Header /> */}
-
-        <Routes>
-          <Route path="/library-items" element={<LibraryItems />} />
-          <Route path="/item-form" element={<ItemForm />} />
-          <Route path="/categories" element={<Categories />} />
-        </Routes>
+    <>
+      <BrowserRouter>
+        <Header />
+        <Switch>
+          <PageWrapper>
+            <Route path="/" exact component={Home} />
+            <Route path="/library-items" component={LibraryItems} />
+            <Route path="/item-form" component={ItemForm} />
+            <Route path="/categories" component={Categories} />
+            <Route path={["/add-category", "/edit-category/:id"]}>
+              <CategoryForm />
+            </Route>
+          </PageWrapper>
+        </Switch>
 
         {/* <Footer /> */}
-      </Router>
-    </div>
+      </BrowserRouter>
+    </>
   );
 };
 

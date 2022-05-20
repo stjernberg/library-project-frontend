@@ -1,17 +1,21 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { DeleteForever, Add } from "@material-ui/icons";
+import { useHistory } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { DeleteForever, Add, Edit } from "@material-ui/icons";
 import { Table, Form, Button } from "react-bootstrap";
 import { TableWrapper } from "../Styling";
-import { fetchCategories, getAllCategories } from "../redux/categorySlice";
+import { fetchCategories, deleteCategory } from "../fetches";
+import { getAllCategories, getMessage } from "../redux/categorySlice";
 
 const Categories = () => {
   const dispatch = useDispatch();
   const categories = useSelector(getAllCategories);
+  const message = useSelector(getMessage);
+  const history = useHistory();
 
   useEffect(() => {
     dispatch(fetchCategories());
-    console.log("Categgories:", categories);
   }, [dispatch]);
 
   return (
@@ -28,20 +32,32 @@ const Categories = () => {
             <tbody key={category.id}>
               <tr>
                 <td>{category.categoryName}</td>
-                <td>{category.id}</td>
 
                 <td>
                   <span
                     role="button"
                     className="text-danger font-bold"
-                    // onClick={() => {
-                    //   dispatch(deleteCategory(category.id));
-                    // }}
+                    onClick={() => {
+                      dispatch(deleteCategory(category.id));
+                    }}
                   >
                     Delete
                     <DeleteForever className="icon" />
                   </span>
                 </td>
+                <td>
+                  <span
+                    role="button"
+                    className="text-warning "
+                    onClick={() => {
+                      history.push(`/edit-category/${category.id}`);
+                    }}
+                  >
+                    Edit
+                    <Edit className="icon" />
+                  </span>
+                </td>
+                <td></td>
               </tr>
             </tbody>
           ))}
@@ -50,13 +66,32 @@ const Categories = () => {
         <span
           role="button"
           className="text-success font-bold"
-          // onClick={() => {
-          //   dispatch(deleteCategory(category.id));
-          // }}
+          onClick={() => {
+            history.push("/add-category");
+          }}
         >
-          Add new category
+          Add new Category
           <Add className="icon" />
         </span>
+
+        {/* <Form onSubmit={handleSubmit(onSubmit)}>
+          <Form.Group controlId="formBasicText">
+            <Form.Control
+              type="text"
+              placeholder="Name"
+              {...register("categoryName", { required: true, minLength: 3 })}
+            />
+            {errors.categoryName && (
+              <span className="text-danger">Min length is 3 characters!</span>
+            )}
+          </Form.Group>
+
+          <Button variant="info" type="submit" className="mt-3 mb-3">
+            Add category
+            <Add className="icon" />
+          </Button>
+        </Form> */}
+        {message && <h4>{`${message}`}</h4>}
       </TableWrapper>
     </>
   );

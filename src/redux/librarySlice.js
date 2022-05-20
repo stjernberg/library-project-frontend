@@ -1,13 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { fetchItems, createItem } from "../fetches";
 
 const baseURL = "https://localhost:44368/api";
-
-export const fetchItems = createAsyncThunk("items/fetchItems", async () => {
-  const response = await axios.get(`${baseURL}/library-items`);
-  console.log(response.data);
-  return response.data;
-});
 
 const initialState = {
   items: [],
@@ -32,25 +27,19 @@ const librarySlice = createSlice({
         state.loading = false;
         console.log(action.payload);
         state.items = action.payload;
+      })
+      .addCase(createItem.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(createItem.fulfilled, (state, action) => {
+        state.loading = false;
+        console.log("Items:", action.payload);
+        state.items.push(action.payload);
       });
   },
-  // extraReducers: {
-  //   [fetchItems.pending]: (state) => {
-  //     console.log("pending");
-  //     state.loading = true;
-  //   },
-
-  //   [fetchItems.fulfilled]: (state, { payload }) => {
-  //     state.loading = false;
-  //     state.items = payload;
-  //   },
-  //   [fetchItems.rejected]: () => {
-  //     console.log("Rejected");
-  //   },
-  // },
 });
 
 //export const { library } = librarySlice.actions;
 export const getAllItems = (state) => state.library.items;
-//export const getAllItems = (state) => state.library.items;
+
 export default librarySlice.reducer;

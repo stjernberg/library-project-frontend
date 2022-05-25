@@ -32,8 +32,6 @@ const CategoryForm = () => {
   if (!isAddMode) {
     let fields = ["categoryName"];
     fields.forEach((field) => setValue(field, category[field]));
-    // let field = "categoryName";
-    // field.setValue(field, category[field]);
   }
   const onSubmit = (data) => {
     console.log("DATA: ", data);

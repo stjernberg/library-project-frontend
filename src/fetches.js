@@ -8,16 +8,35 @@ const baseURL = "https://localhost:44368/api";
 //Get all items
 export const fetchItems = createAsyncThunk("items/fetchItems", async () => {
   const response = await axios.get(`${baseURL}/library-items`);
-  console.log(response.data);
+  return response.data;
+});
+
+//Get one item
+export const getItem = createAsyncThunk("getItem", async (id) => {
+  const response = await axios.get(`${baseURL}/library-items/${id}`);
   return response.data;
 });
 
 //Create a new item
 export const createItem = createAsyncThunk("postItem", async (item) => {
-  console.log("createItem:", item);
   const response = await axios.post(`${baseURL}/library-items`, item);
-  console.log("createItem-response:");
   return response.data;
+});
+
+//Edit an item
+export const editItem = createAsyncThunk("putItem", async (editObject) => {
+  const { id, newItem, message } = editObject;
+  const response = await axios.put(
+    `https://localhost:44368/api/library-items/${id}`,
+    newItem
+  );
+  return { response: response.data, message: message };
+});
+
+//Delete an item
+export const deleteItem = createAsyncThunk("removeItem", async (id) => {
+  const response = await axios.delete(`${baseURL}/library-items/${id}`);
+  return response.status;
 });
 
 //-----------------CATEGORIES-------------------------------------
@@ -25,15 +44,13 @@ export const createItem = createAsyncThunk("postItem", async (item) => {
 //Get all categories
 export const fetchCategories = createAsyncThunk("getCategories", async () => {
   const response = await axios.get(`${baseURL}/categories`);
-  console.log(response.data);
 
   return response.data;
 });
 
-//Get one category with id
+//Get one category
 export const getCategory = createAsyncThunk("getCategory", async (id) => {
   const response = await axios.get(`${baseURL}/categories/${id}`);
-  console.log(response.data);
   return response.data;
 });
 
@@ -41,28 +58,20 @@ export const getCategory = createAsyncThunk("getCategory", async (id) => {
 export const createCategory = createAsyncThunk(
   "postCategory",
   async (category) => {
-    console.log("createdata:", category);
     const response = await axios.post(`${baseURL}/categories`, category);
-    console.log("Resonse createItem:", response.data);
-    // .then(() => {
-    //   axios.get(`${baseURL}/categories`);
-    // });
-    //fetchCategories();
     return response.data;
   }
 );
 
-//Edit a category
+//Edit a category /borrow/return book
 export const editCategory = createAsyncThunk(
   "putCategory",
   async (editObject) => {
     const { id, newCategory } = editObject;
-    console.log("editdata:", id, newCategory);
     const response = await axios.put(
       `https://localhost:44368/api/categories/${id}`,
       newCategory
     );
-    console.log("Editresponse:", response.data);
     return response.data;
   }
 );
@@ -70,7 +79,6 @@ export const editCategory = createAsyncThunk(
 //Delete a category
 export const deleteCategory = createAsyncThunk("removeCategory", async (id) => {
   const response = await axios.delete(`${baseURL}/categories/${id}`);
-  console.log("deleteres:", response.status);
 
   return response.status;
 });

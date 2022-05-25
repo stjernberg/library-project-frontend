@@ -1,12 +1,17 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { useForm } from "react-hook-form";
 import { DeleteForever, Add, Edit } from "@material-ui/icons";
-import { Table, Form, Button } from "react-bootstrap";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
+import { Table, Button } from "react-bootstrap";
 import { TableWrapper } from "../Styling";
 import { fetchCategories, deleteCategory } from "../fetches";
-import { getAllCategories, getMessage } from "../redux/categorySlice";
+import {
+  getAllCategories,
+  getMessage,
+  setMessage,
+} from "../redux/categorySlice";
 
 const Categories = () => {
   const dispatch = useDispatch();
@@ -16,7 +21,24 @@ const Categories = () => {
 
   useEffect(() => {
     dispatch(fetchCategories());
+    dispatch(setMessage(""));
   }, [dispatch]);
+
+  const deleteConfirm = ({ categoryName, id }) => {
+    confirmAlert({
+      title: "Confirm to delete",
+      message: `Do you want to delete ${categoryName}?`,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => dispatch(deleteCategory(id)),
+        },
+        {
+          label: "No",
+        },
+      ],
+    });
+  };
 
   return (
     <>
@@ -38,7 +60,7 @@ const Categories = () => {
                     role="button"
                     className="text-danger font-bold"
                     onClick={() => {
-                      dispatch(deleteCategory(category.id));
+                      deleteConfirm({ ...category });
                     }}
                   >
                     Delete
@@ -63,35 +85,17 @@ const Categories = () => {
           ))}
         </Table>
 
-        <span
-          role="button"
-          className="text-success font-bold"
+        <Button
+          className="font-bold"
           onClick={() => {
             history.push("/add-category");
           }}
         >
           Add new Category
           <Add className="icon" />
-        </span>
+        </Button>
 
-        {/* <Form onSubmit={handleSubmit(onSubmit)}>
-          <Form.Group controlId="formBasicText">
-            <Form.Control
-              type="text"
-              placeholder="Name"
-              {...register("categoryName", { required: true, minLength: 3 })}
-            />
-            {errors.categoryName && (
-              <span className="text-danger">Min length is 3 characters!</span>
-            )}
-          </Form.Group>
-
-          <Button variant="info" type="submit" className="mt-3 mb-3">
-            Add category
-            <Add className="icon" />
-          </Button>
-        </Form> */}
-        {message && <h4>{`${message}`}</h4>}
+        {message && <p className="mt-3">{`${message}`}</p>}
       </TableWrapper>
     </>
   );

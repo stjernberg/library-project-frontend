@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+
 import {
   fetchCategories,
   createCategory,
@@ -38,7 +38,6 @@ const categorySlice = createSlice({
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.loading = false;
-        console.log(action.payload);
         state.categories = action.payload;
       })
 
@@ -47,7 +46,6 @@ const categorySlice = createSlice({
       })
       .addCase(createCategory.fulfilled, (state, action) => {
         state.loading = false;
-        console.log(action.payload);
         state.categories.push(action.payload);
       })
       .addCase(deleteCategory.pending, (state) => {
@@ -55,20 +53,17 @@ const categorySlice = createSlice({
       })
       .addCase(deleteCategory.fulfilled, (state, action) => {
         state.loading = false;
-        console.log("Returned response", action.payload);
         state.message = "Category has successfully been deleted.";
       })
       .addCase(deleteCategory.rejected, (state) => {
-        state.loading = true;
-        console.log("Category can't be deleted.");
-        state.message = "Category can't be deleted.";
+        state.message =
+          "Category can't be deleted. Possibly because it's connected to an item.";
       })
       .addCase(getCategory.pending, (state) => {
         state.loading = true;
       })
       .addCase(getCategory.fulfilled, (state, action) => {
         state.loading = false;
-        console.log("Category:", action.payload);
         state.category = action.payload;
       })
       .addCase(editCategory.pending, (state) => {
@@ -76,32 +71,14 @@ const categorySlice = createSlice({
       })
       .addCase(editCategory.fulfilled, (state, action) => {
         state.loading = false;
-        console.log("editCategory:", action.payload);
         state.categories.push(action.payload);
+        state.message = "Category successfully added";
+      })
+      .addCase(editCategory.rejected, (state) => {
+        state.message = "Category couldn't be deleted.";
       });
   },
 });
-
-//-----------Edit a category----------------
-
-// const editCategoryAPI = async (id, category) => {
-//   return await axios.put(
-//     `https://localhost:44368/api/categories/${id}`,
-//     category
-//   );
-// };
-
-// export const editCategory = (id, category) => (dispatch) => {
-//   editCategoryAPI(id, category)
-//     .then((res) => {
-//       console.log("Category is edited:", res.data);
-//       dispatch(setCategory(res.data));
-//     })
-//     .catch((err) => {
-//       console.log("Error:", err);
-//       // dispatch error
-//     });
-// };
 
 export const { setMessage, setCategory } = categorySlice.actions;
 export const getAllCategories = (state) => state.categories.categories;

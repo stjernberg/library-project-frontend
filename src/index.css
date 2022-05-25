@@ -14,3 +14,7 @@ span {
   background: #eeeeee;
   height: 90px;
 }
+
+.icon {
+  font-weight: bold;
+}

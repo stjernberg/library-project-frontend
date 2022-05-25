@@ -1,41 +1,62 @@
-import { useForm, Controller } from "react-hook-form";
-import React, { useState, useEffect, useRef } from "react";
+import { useForm } from "react-hook-form";
+import React, { useState, useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Button, Form } from "react-bootstrap";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-// import DoubleArrowIcon from "@mui/icons-material/DoubleArrow";
 import { getAllCategories } from "../redux/categorySlice";
-import { fetchCategories, createItem } from "../fetches";
+import { getMessage, setMessage } from "../redux/librarySlice";
+import { fetchCategories, getItem, createItem, editItem } from "../fetches";
 import { FormWrapper } from "../Styling";
 
 const ItemForm = () => {
   const dispatch = useDispatch();
   const { item } = useSelector((state) => state.library);
   const categories = useSelector(getAllCategories);
+  const message = useSelector(getMessage);
   const { id } = useParams();
   const isAddMode = !id;
-  const [type, setType] = useState("");
-  const [borrowDate, setBorrowDate] = useState("");
-  //let typeChosen = false;
+  const [mediaType, setMediaType] = useState("");
+  const history = useHistory();
+  const [typeChosen, setTypeChosen] = useState(false);
+  const [showButtons, setShowButtons] = useState(false);
+  const [isBook, setIsBook] = useState(false);
+  const [isRef, setIsRef] = useState(false);
+  const [isAudio, setIsAudio] = useState(false);
 
   useEffect(() => {
     dispatch(fetchCategories());
-    if (!isAddMode) {
-      //dispatch(getItem(id));
-      //dispatch(setMessage(null));
-      //console.log(item);
+    if (isAddMode) {
+      setShowButtons(true);
     }
-  }, [dispatch]);
+    if (!isAddMode) {
+      dispatch(getItem(id));
+      dispatch(setMessage(""));
+    }
+  }, [dispatch, id, isAddMode]);
 
-  const types = ["Book", "DVD", "Audio Book", "Reference Book"];
-  const inputRef = useRef();
+  const addBook = () => {
+    setMediaType("Book");
+    setIsBook(true);
+    setTypeChosen(true);
+    setShowButtons(false);
+  };
+  const addAudio = (type) => {
+    setMediaType(type);
+    setIsAudio(true);
+    setTypeChosen(true);
+    setShowButtons(false);
+  };
+  const addReference = () => {
+    setMediaType("Reference Book");
+    setIsRef(true);
+    setTypeChosen(true);
+    setShowButtons(false);
+  };
+
   const {
     register,
     handleSubmit,
     setValue,
-    control,
     formState: { errors },
   } = useForm();
 
@@ -54,197 +75,267 @@ const ItemForm = () => {
     fields.forEach((field) => setValue(field, item[field]));
   }
 
-  const handleChange = (event) => {
-    setType(event.target.value);
-    console.log(type);
-    //typeChosen = true;
-  };
-
   const onSubmit = (data) => {
-    console.log("DATA: ", data);
-    // const newItem = {
-    //   title: data.title,
-    //   author: data.author,
-    //   pages: data.pages,
-    //   type: data.type,
-    //   categoryId: data.categoryId,
-    //   isBorrowable: data.isBorrowable,
-    //   borrower: data.borrower,
-    //   borrowDate: data.borrowDate,
-    //   runTimeMinutes: data.runTimeMinutes,
-    // };
-    dispatch(createItem(data));
-
-    //return isAddMode ? createItem(newItem) : updateItem(id, newItem);
+    return isAddMode ? addItem(data) : updateItem(data);
   };
-  // const createItem = (newItem) => {
-  //   dispatch(addItem(newItem));
-  // };
+  const addItem = (newItem) => {
+    dispatch(createItem(newItem));
+  };
 
-  // const updateItem = (id, newItem) => {
-  //   dispatch(editItem(id, newItem));
-  // };
+  const updateItem = (newItem) => {
+    console.log("new item:", newItem);
+    dispatch(
+      editItem({
+        id: id,
+        newItem: newItem,
+        message: "Item has successfully been updated",
+      })
+    );
+  };
 
   return (
     <>
       <h2 className="mt-3 text-center">
         {isAddMode ? "Create an item" : "Edit an item"}
       </h2>
-      <FormWrapper>
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <Form.Select
-            {...register("type", { required: true })}
-            aria-label="Choose type"
-            className="mt-2"
-            onChange={handleChange}
+      {showButtons && (
+        <div>
+          <Button
+            variant="info"
+            className="m-3"
+            onClick={() => {
+              addAudio("DVD");
+            }}
           >
-            <option>Choose type</option>
-            {types.map((type, index) => (
-              <option value={type} key={index}>
-                {type}
-              </option>
-            ))}
-          </Form.Select>
-          {/* <div>*/}
+            Add DVD
+          </Button>
+          <Button
+            variant="info"
+            className="m-3"
+            onClick={() => {
+              addBook();
+            }}
+          >
+            {isAddMode ? "Add Book" : "Edit Book"}
+          </Button>
 
-          <Form.Select
-            {...register("categoryId", { required: true, valueAsNumber: true })}
-            aria-label="Choose category"
-            className="mt-2"
+          <Button
+            variant="info"
+            className="m-3"
+            onClick={() => {
+              addAudio("Audio Book");
+            }}
           >
-            <option>Choose category</option>
-            {categories.map((category) => (
-              <option value={category.id} key={category.id}>
-                {category.categoryName}
-              </option>
-            ))}
-          </Form.Select>
-          {/* {errors.title && (
-            <span className="text-danger">Category is required</span>
-          )} */}
-          <Form.Group controlId="formTitle">
-            <Form.Label>Title</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Title"
-              {...register("title", { required: true, minLength: 2 })}
-            />
-            {errors.title && (
-              <span className="text-danger">Title is Required!</span>
+            {isAddMode ? "Add Audio Book" : "Edit Audio Book"}
+          </Button>
+
+          <Button
+            variant="info"
+            className="m-3"
+            onClick={() => {
+              addReference();
+            }}
+          >
+            {isAddMode ? "Add Reference Book" : "Edit Reference Book"}
+          </Button>
+        </div>
+      )}
+
+      {!isAddMode && (
+        <div>
+          {item.type === "DVD" && (
+            <Button
+              variant="info"
+              className="m-3"
+              onClick={() => {
+                addAudio("DVD");
+              }}
+            >
+              {isAddMode ? "Add DVD" : "Edit DVD"}
+            </Button>
+          )}
+          {item.type === "Book" && (
+            <Button
+              variant="info"
+              className="m-3"
+              onClick={() => {
+                addBook();
+              }}
+            >
+              {isAddMode ? "Add Book" : "Edit Book"}
+            </Button>
+          )}
+          {item.type === "Audio Book" && (
+            <Button
+              variant="info"
+              className="m-3"
+              onClick={() => {
+                addAudio("Audio Book");
+              }}
+            >
+              {isAddMode ? "Add Audio Book" : "Edit Audio Book"}
+            </Button>
+          )}
+          {item.type === "Reference Book" && (
+            <Button
+              variant="info"
+              className="m-3"
+              onClick={() => {
+                addReference();
+              }}
+            >
+              {isAddMode ? "Add Reference Book" : "Edit Reference Book"}
+            </Button>
+          )}
+        </div>
+      )}
+
+      {typeChosen && (
+        <FormWrapper>
+          <Form onSubmit={handleSubmit(onSubmit)}>
+            <Form.Group>
+              <Form.Label>Type</Form.Label>
+              <Form.Select
+                {...register("type", { required: true })}
+                aria-label="Choose type"
+                className="mt-2"
+              >
+                {isAddMode ? (
+                  <option value={mediaType}>{mediaType}</option>
+                ) : (
+                  <option value={item.type}>{item.type}</option>
+                )}
+              </Form.Select>
+            </Form.Group>
+            {errors.type && (
+              <span className="text-danger">Type is required</span>
             )}
-          </Form.Group>
-
-          {type != "DVD" && (
-            <Form.Group controlId="formAuthor">
-              <Form.Label className="mt-2">Author</Form.Label>
+            <Form.Group>
+              <Form.Label className="mt-3">Category</Form.Label>
+              <Form.Select
+                {...register("categoryId", {
+                  required: true,
+                  valueAsNumber: true,
+                })}
+                aria-label="Choose category"
+              >
+                <option>Choose category</option>
+                {categories.map((category) => (
+                  <option value={category.id} key={category.id}>
+                    {category.categoryName}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            {errors.category && (
+              <span className="text-danger">Category is required</span>
+            )}
+            <Form.Group controlId="formTitle">
+              <Form.Label className="mt-3">Title</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Author"
-                //disabled={(type = "DVD")}
-                {...register("author", { required: true, minLength: 2 })}
+                placeholder="Title"
+                {...register("title", { required: true, minLength: 2 })}
               />
-              {errors.text && (
-                <span className="text-danger">
-                  Min 2 characters is Required!
-                </span>
+              {errors.title && (
+                <span className="text-danger">Title is Required!</span>
               )}
             </Form.Group>
-          )}
+            {!isAudio && (
+              <Form.Group controlId="formAuthor">
+                <Form.Label className="mt-3">Author</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Author"
+                  {...register("author", { required: true, minLength: 2 })}
+                />
+                {errors.author && (
+                  <span className="text-danger">
+                    Min 2 characters is Required!
+                  </span>
+                )}
+              </Form.Group>
+            )}
+            {!isAudio && (
+              <Form.Group controlId="formBasicText">
+                <Form.Label className="mt-3">Pages</Form.Label>
+                <Form.Control
+                  type="number"
+                  placeholder="Pages"
+                  {...register("pages", {
+                    required: true,
+                    valueAsNumber: true,
+                    minLength: 2,
+                  })}
+                />
+                {errors.pages && (
+                  <span className="text-danger">Pages is required</span>
+                )}
+              </Form.Group>
+            )}
+            {isAudio && (
+              <Form.Group controlId="formBasicText">
+                <Form.Label className="mt-3">Run Time Minutes</Form.Label>
+                <Form.Control
+                  type="number"
+                  placeholder="Runtime minutes"
+                  {...register("runTimeMinutes", {
+                    valueAsNumber: true,
+                    required: true,
+                    minLength: 2,
+                  })}
+                />
+                {errors.runTimeMinutes && (
+                  <span className="text-danger">Run Time Minutes</span>
+                )}
+              </Form.Group>
+            )}
 
-          <Form.Group controlId="formBasicText">
-            <Form.Label className="mt-2">Pages</Form.Label>
-            <Form.Control
-              type="number"
-              placeholder="Pages"
-              {...register("pages", {
-                required: true,
-                valueAsNumber: true,
-                minLength: 2,
-              })}
+            {/* Jag fick det inte att funka med att skicka date object med null value
+           Så jag gjorde detta som en "workaround" eftersom jag måste lämna in uppgiften nu. */}
+            <input
+              type="datetime"
+              hidden
+              value="2022-05-25T07:14:11.302Z"
+              placeholder="borrowDate"
+              {...register("borrowDate", {})}
             />
-            {errors.createdBy && (
-              <span className="text-danger">Pages is required</span>
-            )}
-          </Form.Group>
-          <Form.Group controlId="formBasicText">
-            <Form.Label className="mt-2">Run Time Minutes</Form.Label>
-            <Form.Control
-              type="number"
-              placeholder="Runtime minutes"
-              {...register("runTimeMinutes", {
-                valueAsNumber: true,
-                required: true,
-                minLength: 2,
-              })}
-            />
-            {errors.createdBy && (
-              <span className="text-danger">Run Time Minutes</span>
-            )}
-          </Form.Group>
-          <Form.Group controlId="formAuthor">
-            <Form.Label className="mt-2">Borrower</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Borrower"
-              {...register("borrower", { required: true, minLength: 2 })}
-            />
-            {errors.text && (
-              <span className="text-danger">Min 2 characters is Required!</span>
-            )}
-          </Form.Group>
-          <Controller
-            control={control}
-            name="borrowDate"
-            render={({ field }) => (
-              <DatePicker
-                className="mt-4"
-                placeholderText="Select date"
-                format="yyyy-MM-dd"
-                onChange={(date) => field.onChange(date)}
-                selected={field.value}
+
+            {!isRef && (
+              <input
+                className="mt-2 ml-2"
+                type="checkbox"
+                hidden
+                checked="checked"
+                {...register("isBorrowable", {})}
               />
             )}
-          />
-          {/* {errors.borrowDate && (
-            <span className="text-danger">Borrowdate is required</span>
-          )} */}
-          {/* <input
-            type="datetime"
-            placeholder="borrowDate"
-            {...register("borrowDate", {})}
-          /> */}
-          <Form.Group
-            controlId="formisBorrowable"
-            className="d-flex align-items-center"
-          >
-            <Form.Label className="mt-3 mr-2">Is Borrowable</Form.Label>
-            <Form.Check
-              className="mt-2 ml-2"
-              type="checkbox"
-              placeholder="isBorrowable"
-              {...register("isBorrowable", {})}
-            />
-          </Form.Group>
+            {isRef && (
+              <input
+                className="mt-2 ml-2"
+                type="checkbox"
+                hidden
+                {...register("isBorrowable", {})}
+              />
+            )}
 
-          <div className="text-center mt-3">
-            <Button variant="info" type="submit">
-              {isAddMode ? "Add" : "Edit"}
-            </Button>
-            {/* </div>*/}
-          </div>
-        </Form>
-      </FormWrapper>
-      {/* {message && <h4>{`${message}`}</h4>} */}
-      {/* <span
-        className="font-bold"
-        role="button"
-        onClick={() => history.push("/posts")}
-      >
-        View posts
-        <DoubleArrowIcon className="icon" />
-      </span> */}
+            <div className="text-center m-3">
+              <Button variant="info" type="submit">
+                {isAddMode ? "Add" : "Edit"}
+              </Button>
 
-      {/* {message && <p>{message}</p>} */}
+              <Button
+                className="m-3"
+                variant="primary"
+                onClick={() => history.push("/")}
+              >
+                Back to list
+              </Button>
+            </div>
+          </Form>
+        </FormWrapper>
+      )}
+      {message && <p className="mt-3">{`${message}`}</p>}
     </>
   );
 };

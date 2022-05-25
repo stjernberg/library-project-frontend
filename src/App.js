@@ -5,27 +5,27 @@ import ItemForm from "./components/ItemForm";
 import Categories from "./components/Categories";
 import CategoryForm from "./components/CategoryForm";
 import Header from "./components/Header";
-import Home from "./components/Home";
+import Borrow from "./components/Borrow";
 import { PageWrapper } from "./Styling";
 
 const App = () => {
   return (
     <>
-      <BrowserRouter>
+      <BrowserRouter forceRefresh>
         <Header />
         <Switch>
           <PageWrapper>
-            <Route path="/" exact component={Home} />
-            <Route path="/library-items" component={LibraryItems} />
-            <Route path="/item-form" component={ItemForm} />
+            <Route path="/" exact component={LibraryItems} />
+            <Route path={["/add-item", "/edit-item/:id"]}>
+              <ItemForm />
+            </Route>
             <Route path="/categories" component={Categories} />
             <Route path={["/add-category", "/edit-category/:id"]}>
               <CategoryForm />
             </Route>
+            <Route path="/borrow-book/:id" component={Borrow} />
           </PageWrapper>
         </Switch>
-
-        {/* <Footer /> */}
       </BrowserRouter>
     </>
   );

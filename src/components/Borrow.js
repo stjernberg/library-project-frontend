@@ -21,7 +21,6 @@ const Borrow = () => {
     dispatch(setMessage(""));
     console.log(item);
   }, [dispatch]);
-  
 
   const {
     register,
@@ -49,7 +48,8 @@ const Borrow = () => {
     editBorrow(newItem);
   };
 
-  const onSubmitReturn = () => {
+  const onSubmitReturn = (data) => {
+    console.log("DATA: ", data);
     const newItem = {
       title: item.title,
       author: item.author,
@@ -59,15 +59,14 @@ const Borrow = () => {
       categoryId: item.categoryId,
       isBorrowable: true,
       borrower: "",
-      //BorrowDate ska nollställas, men jag lyckaded inte få det att funka,
-      //så jag låter datumet vara kvar.
-      borrowDate: item.borrowDate,
+      borrowDate: undefined,
     };
 
     editBorrow(newItem);
   };
 
   const editBorrow = (newItem) => {
+    console.log(newItem);
     dispatch(
       editItem({
         id: id,
@@ -133,13 +132,6 @@ const Borrow = () => {
       {!item.isBorrowable && (
         <FormWrapper>
           <Form onSubmit={handleSubmit(onSubmitReturn)}>
-            <input
-              hidden
-              type="datetime"
-              placeholder="borrowDate"
-              {...register("borrowDate", {})}
-            />
-
             <div className="text-center m-3">
               <Button variant="info" type="submit">
                 Return book

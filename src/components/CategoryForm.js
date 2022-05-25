@@ -18,7 +18,7 @@ const CategoryForm = () => {
   useEffect(() => {
     if (!isAddMode) {
       dispatch(getCategory(id));
-      dispatch(setMessage(""));
+      //dispatch(setMessage(""));
     }
   }, [dispatch, id, isAddMode]);
 
@@ -26,6 +26,7 @@ const CategoryForm = () => {
     register,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm();
 
@@ -34,8 +35,7 @@ const CategoryForm = () => {
     fields.forEach((field) => setValue(field, category[field]));
   }
   const onSubmit = (data) => {
-    console.log("DATA: ", data);
-
+    reset();
     return isAddMode ? addCategory(data) : updateCategory(data);
   };
 
@@ -44,7 +44,6 @@ const CategoryForm = () => {
   };
 
   const updateCategory = (newCategory) => {
-    console.log("new category:", newCategory);
     dispatch(editCategory({ id: id, newCategory: newCategory }));
   };
 

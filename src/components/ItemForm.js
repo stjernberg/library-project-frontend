@@ -57,6 +57,7 @@ const ItemForm = () => {
     register,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm();
 
@@ -76,6 +77,7 @@ const ItemForm = () => {
   }
 
   const onSubmit = (data) => {
+    // reset();
     return isAddMode ? addItem(data) : updateItem(data);
   };
   const addItem = (newItem) => {
@@ -83,7 +85,6 @@ const ItemForm = () => {
   };
 
   const updateItem = (newItem) => {
-    console.log("new item:", newItem);
     dispatch(
       editItem({
         id: id,

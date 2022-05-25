@@ -47,6 +47,7 @@ const categorySlice = createSlice({
       .addCase(createCategory.fulfilled, (state, action) => {
         state.loading = false;
         state.categories.push(action.payload);
+        state.message = "Category successfully added";
       })
       .addCase(deleteCategory.pending, (state) => {
         state.loading = true;
@@ -72,7 +73,7 @@ const categorySlice = createSlice({
       .addCase(editCategory.fulfilled, (state, action) => {
         state.loading = false;
         state.categories.push(action.payload);
-        state.message = "Category successfully added";
+        state.message = "Category successfully edited";
       })
       .addCase(editCategory.rejected, (state) => {
         state.message = "Category couldn't be deleted.";

@@ -303,17 +303,6 @@ const ItemForm = () => {
               </Form.Group>
             )}
 
-            {/* Jag fick det inte att funkade med att skapa nytt item med date object null value
-           Så jag gjorde detta som en "workaround" eftersom jag måste lämna in uppgiften nu. */}
-            <input
-              type="datetime"
-              hidden
-              // value="2022-05-25T07:14:11.302Z"
-
-              placeholder="borrowDate"
-              {...register("borrowDate", {})}
-            />
-
             {!isRef && (
               <input
                 className="mt-2 ml-2"
